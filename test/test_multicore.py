@@ -30,6 +30,24 @@ from imgaug.testutils import reseed
 from imgaug.augmentables.batches import Batch, UnnormalizedBatch
 
 
+class Test__switch_to_spawn_if_nixos(unittest.TestCase):
+    @mock.patch("platform.version")
+    @mock.patch("multiprocessing.set_start_method")
+    def test_mocked_no_nixos(self, mock_ssm, mock_version):
+        from imgaug.multicore import _switch_to_spawn_if_nixos
+        mock_version.return_value = "foo"
+        _switch_to_spawn_if_nixos()
+        assert mock_ssm.call_count == 0
+
+    @mock.patch("platform.version")
+    @mock.patch("multiprocessing.set_start_method")
+    def test_mocked_no_nixos(self, mock_ssm, mock_version):
+        from imgaug.multicore import _switch_to_spawn_if_nixos
+        mock_version.return_value = "NixOS"
+        _switch_to_spawn_if_nixos()
+        mock_ssm.assert_called_once_with("spawn")
+
+
 class TestPool(unittest.TestCase):
     def setUp(self):
         reseed()
